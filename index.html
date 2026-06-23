@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn Profile Analyzer</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{
+  background:linear-gradient(135deg,#061826,#0a66c2,#111827);
+  min-height:100vh;color:white;padding:30px
+}
+.container{
+  max-width:1100px;margin:auto;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);border-radius:25px;
+  padding:35px;backdrop-filter:blur(16px);box-shadow:0 20px 50px rgba(0,0,0,.35)
+}
+h1{text-align:center;font-size:42px;margin-bottom:10px}
+.subtitle{text-align:center;color:#dbeafe;margin-bottom:30px;font-size:18px}
+textarea{
+  width:100%;height:260px;border:none;border-radius:18px;padding:20px;
+  font-size:16px;outline:none;resize:none
+}
+button{
+  margin-top:18px;background:#facc15;color:#111;border:none;
+  padding:15px 28px;border-radius:30px;font-weight:bold;font-size:16px;cursor:pointer
+}
+button:hover{background:white}
+.results{
+  display:none;margin-top:35px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px
+}
+.card{
+  background:white;color:#111;border-radius:20px;padding:24px;
+  box-shadow:0 10px 25px rgba(0,0,0,.22)
+}
+.card h2{color:#0a66c2;margin-bottom:12px}
+.score{
+  font-size:55px;font-weight:bold;color:#0a66c2;text-align:center
+}
+.badge{
+  display:inline-block;background:#e0f2fe;color:#075985;
+  padding:7px 12px;border-radius:20px;margin:5px;font-size:14px
+}
+ul{padding-left:20px;line-height:1.8}
+.output{
+  background:#f8fafc;border-left:5px solid #0a66c2;padding:15px;border-radius:10px;line-height:1.6
+}
+footer{text-align:center;margin-top:25px;color:#dbeafe}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>AI LinkedIn Profile Analyzer</h1>
+  <p class="subtitle">
+    Paste your LinkedIn profile text and get a profile score, keyword analysis, and improvement suggestions.
+  </p>
+
+  <textarea id="profileText" placeholder="Paste your LinkedIn About section, headline, skills, projects, internship details, education, etc..."></textarea>
+
+  <button onclick="analyzeProfile()">Analyze Profile</button>
+
+  <div class="results" id="results">
+
+    <div class="card">
+      <h2>Profile Score</h2>
+      <div class="score" id="score">0</div>
+      <p id="scoreText" style="text-align:center"></p>
+    </div>
+
+    <div class="card">
+      <h2>Detected Strengths</h2>
+      <div id="strengths"></div>
+    </div>
+
+    <div class="card">
+      <h2>Missing Keywords</h2>
+      <div id="missing"></div>
+    </div>
+
+    <div class="card">
+      <h2>Improvement Suggestions</h2>
+      <ul id="suggestions"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Optimized Headline</h2>
+      <div class="output" id="headline"></div>
+    </div>
+
+    <div class="card">
+      <h2>Improved About Section</h2>
+      <div class="output" id="about"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Built using HTML, CSS and JavaScript | LinkedIn Profile Analyzer Project
+  </footer>
+</div>
+
+<script>
+function analyzeProfile(){
+  let text = document.getElementById("profileText").value.toLowerCase();
+
+  if(text.trim() === ""){
+    alert("Please paste your LinkedIn profile text first.");
+    return;
+  }
+
+  let score = 30;
+  let strengths = [];
+  let missing = [];
+  let suggestions = [];
+
+  const keywords = {
+    "python":"Python",
+    "java":"Java",
+    "c++":"C++",
+    "html":"HTML",
+    "css":"CSS",
+    "javascript":"JavaScript",
+    "sql":"SQL",
+    "machine learning":"Machine Learning",
+    "artificial intelligence":"Artificial Intelligence",
+    "ai":"AI",
+    "data analysis":"Data Analysis",
+    "nlp":"NLP",
+    "project":"Projects",
+    "internship":"Internship",
+    "github":"GitHub",
+    "leadership":"Leadership",
+    "team":"Teamwork",
+    "problem solving":"Problem Solving"
+  };
+
+  Object.keys(keywords).forEach(key => {
+    if(text.includes(key)){
+      score += 4;
+      strengths.push(keywords[key]);
+    } else {
+      missing.push(keywords[key]);
+    }
+  });
+
+  if(text.length > 500){ score += 10; strengths.push("Detailed Profile"); }
+  else suggestions.push("Add a longer About section with education, skills, projects and goals.");
+
+  if(text.includes("project")) score += 8;
+  else suggestions.push("Mention at least 2-3 strong projects with technologies used.");
+
+  if(text.includes("internship") || text.includes("experience")) score += 8;
+  else suggestions.push("Add internship, training, or practical work experience.");
+
+  if(text.includes("github")) score += 6;
+  else suggestions.push("Add your GitHub link to show coding work.");
+
+  if(text.includes("linkedin") || text.includes("connect")) score += 3;
+
+  if(score > 100) score = 100;
+
+  if(score >= 80){
+    document.getElementById("scoreText").innerText = "Excellent profile. Very recruiter-friendly.";
+  } else if(score >= 60){
+    document.getElementById("scoreText").innerText = "Good profile, but can be improved.";
+  } else {
+    document.getElementById("scoreText").innerText = "Needs improvement for better visibility.";
+  }
+
+  if(suggestions.length === 0){
+    suggestions.push("Your profile looks strong. Keep updating it with latest projects and achievements.");
+  }
+
+  document.getElementById("score").innerText = score + "/100";
+
+  document.getElementById("strengths").innerHTML =
+    strengths.slice(0,12).map(s => `<span class="badge">${s}</span>`).join("");
+
+  document.getElementById("missing").innerHTML =
+    missing.slice(0,12).map(s => `<span class="badge">${s}</span>`).join("");
+
+  document.getElementById("suggestions").innerHTML =
+    suggestions.map(s => `<li>${s}</li>`).join("");
+
+  document.getElementById("headline").innerText =
+    "Computer Science Engineering Student | AI & Web Development Enthusiast | Python, JavaScript, Machine Learning & Data Analysis";
+
+  document.getElementById("about").innerText =
+    "I am a Computer Science Engineering student passionate about Artificial Intelligence, Web Development, Data Analysis and building practical technology solutions. I enjoy working on real-world projects involving frontend development, datasets, automation and intelligent systems. I am continuously improving my technical skills through hands-on projects, internships and problem-solving.";
+
+  document.getElementById("results").style.display = "grid";
+}
+</script>
+
+</body>
+</html>
